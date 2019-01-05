@@ -6,8 +6,6 @@ var Stack = function() {
 
   // Implement the methods below
   someInstance.push = function(value) {
-    //pass in value
-    //assign value as key in storage, one higher thst the last one
     var key = someInstance.size().toString();
     storage[key] = value;
   };
