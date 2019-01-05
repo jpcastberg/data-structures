@@ -38,3 +38,6 @@ describe('binarySearchTree', function() {
     expect(array).to.eql([5, 2, 3, 7]);
   });
 });
+
+
+Hi John
