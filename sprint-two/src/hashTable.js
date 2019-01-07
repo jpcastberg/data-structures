@@ -7,17 +7,21 @@ var HashTable = function() {
 
 HashTable.prototype.insert = function(k, v) { // (cat, fiesty)
   var index = getIndexBelowMaxForKey(k, this._limit); // ex. return 1
+  var overwritten = false;
   // if index of storage is undefined, storage[index] = []
   // push in key value pair storage[index].push()
   if (!this._storage[index]){
-    this._storage.set(index, [k, v]);
-  } else if (Array.isArray(this.storage[index][0])) {
-    this._storage[index].push([k, v])
-  } else {
-    var thirdLevel = []
-    thirdLevel.push(this.storage[index]);
-    this.storage[index] = thirdLevel;
-  } 
+    this._storage.set(index, []);
+  }
+  for (var i = 0; i < storage[index].length; i++){
+    if (storage[index][i][0] === k) {
+      storage[index][i][1] = v;
+      overwritten = true;
+    }
+  }
+  if (!overwritten){
+    this._storage[index].push([k, v]);
+  }
 };
 
 HashTable.prototype.retrieve = function(k) {
