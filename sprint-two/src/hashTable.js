@@ -1,8 +1,44 @@
 
 
 var HashTable = function() {
+  this._nodeCount = 0;
   this._limit = 8;
   this._storage = LimitedArray(this._limit);
+  // this.counter?? Goes up for insert and goes down for remove. 
+  //Once the counter hits more than 75% than this._limit, Have .insert "activate" set limit to double and rehash EVERYTHING
+  // by iterating through ALL the tuples and throwing them back in the hasher to generate their new indices
+  // Once the counter hits less than 25% than this._limit, Have .remove "activate" set limit to half and rehash Everything etc..
+
+
+};
+
+HashTable.prototype.checkRatio = function(nodeCount, arrayLimit) {
+  return Math.floor((nodeCount / arrayLimit) * 100);
+};
+
+HashTable.prototype.changeSize = function(halveOrDouble) {
+  var tempStorage = [];
+  
+  this._storage.each(function(ele, ind, storage) {
+    if (ele) {
+      for (var j = 0; j < ele.length; j++) {
+        tempStorage.push(ele[j]);
+      }
+    }
+  });
+
+  if (halveOrDouble === 'halve') {
+    this._limit = this._limit / 2;
+  }
+  if (halveOrDouble === 'double') {
+    this._limit = this._limit * 2;
+  }
+
+  this._storage = LimitedArray(this._limit);
+  this._nodeCount = 0;
+  for (var i = 0; i < tempStorage.length; i++) {
+    this.insert(tempStorage[i][0], tempStorage[i][1]);
+  }
 };
 
 HashTable.prototype.insert = function(k, v) { // (cat, fiesty)
@@ -16,27 +52,32 @@ HashTable.prototype.insert = function(k, v) { // (cat, fiesty)
     storageIndex = this._storage.get(index);
   }
 
-  for (var i = 0; i < storageIndex.length; i++){
+  for (var i = 0; i < storageIndex.length; i++) {
     if (storageIndex[i][0] === k) {
       storageIndex[i][1] = v;
       overwritten = true;
     }
   }
-  if (!overwritten){
+  if (!overwritten) {
     storageIndex.push([k, v]);
+    this._nodeCount++;
+    if (this.checkRatio(this._nodeCount, this._limit) > 75) {
+      this.changeSize('double');
+    }
   }
 };
 
 HashTable.prototype.retrieve = function(k) {
   var index = getIndexBelowMaxForKey(k, this._limit); // 0-7
   var storageIndex = this._storage.get(index);
-  for (var i = 0; i < storageIndex.length; i++) {
-    if (storageIndex[i][0] === k) {
-      return storageIndex[i][1];
+
+  if (storageIndex) {
+    for (var i = 0; i < storageIndex.length; i++) {
+      if (storageIndex[i][0] === k) {
+        return storageIndex[i][1];
+      }
     }
-  
   }
-  
 };
 
 HashTable.prototype.remove = function(k) {
@@ -45,6 +86,10 @@ HashTable.prototype.remove = function(k) {
   for (var i = 0; i < storageIndex.length; i++) {
     if (storageIndex[i][0] === k) {
       storageIndex.splice(i, 1);
+      this._nodeCount--;
+      if (this.checkRatio(this._nodeCount, this._limit) < 25) {
+        this.changeSize('halve');
+      }
     } 
   }
 };

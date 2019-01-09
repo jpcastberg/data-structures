@@ -1,5 +1,4 @@
 var BinarySearchTree = function(value) {
-  debugger;
   this.value = value;
 
   this.left = undefined;
